@@ -1,0 +1,17 @@
+# 编译产物
+Debug/
+obj/
+*.o
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+
+# IDE配置（如果不想同步）
+.settings/
+*.launch
+
+# 其他临时文件
+*.log
+*.tmp
