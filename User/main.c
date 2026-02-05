@@ -1,15 +1,12 @@
-/********************************** (C) COPYRIGHT *******************************
+﻿/********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
-*
-* Git版本控制演示 - 这是第二次提交的修改
-*
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for
+* Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
@@ -45,30 +42,30 @@ void TIM2_PWM_Init(void)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = {0};
     TIM_OCInitTypeDef TIM_OCInitStructure = {0};
 
-    // ʹ��TIM2ʱ��
+    // 使能TIM2时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    // ====== ���ö�ʱ���������� ======
-    TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;  // �Զ���װ��ֵ 19999
-    TIM_TimeBaseStructure.TIM_Prescaler = 96 - 1;       // Ԥ��Ƶ�� 95��96MHz��1MHz��
+    // ====== 配置定时器基本参数 ======
+    TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;  // 自动重装载值 19999
+    TIM_TimeBaseStructure.TIM_Prescaler = 96 - 1;       // 预分频器 95（96MHz→1MHz）
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ���ϼ���
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // 向上计数
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
-    // ====== ����PWMģʽ ======
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;         // PWMģʽ1
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;  // ���ʹ��
-    TIM_OCInitStructure.TIM_Pulse = PWM_MIN;                  // ��ʼ������0�ȣ�
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // �ߵ�ƽ��Ч
+    // ====== 配置PWM模式 ======
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;         // PWM模式1
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;  // 输出使能
+    TIM_OCInitStructure.TIM_Pulse = PWM_MIN;                  // 初始脉宽（0度）
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // 高电平有效
 
-    // ����TIM2ͨ��1
+    // 配置TIM2通道1
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);  // ʹ��Ԥװ��
+    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);  // 使能预装载
 
-    // ʹ���Զ���װ��Ԥװ��
+    // 使能自动重装载预装载
     TIM_ARRPreloadConfig(TIM2, ENABLE);
 
-    // ������ʱ��
+    // 启动定时器
     TIM_Cmd(TIM2, ENABLE);
 }
 
@@ -78,12 +75,12 @@ void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void LED_Test_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  // �ĳ�GPIOB
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  // 改成GPIOB
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;  // �ĳ�Pin_2
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;  // 改成Pin_2
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);  // �ĳ�GPIOB
+    GPIO_Init(GPIOC, &GPIO_InitStructure);  // 改成GPIOB
 }
 
 void Tim3_Init(u16 arr, u16 psc)
@@ -91,55 +88,55 @@ void Tim3_Init(u16 arr, u16 psc)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct = {0};
     NVIC_InitTypeDef NVIC_InitStructure = {0};
 
-    // ʹ��TIM3ʱ��
+    // 使能TIM3时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-    // ====== ���ö�ʱ���������� ======
-    TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;              // ʱ�ӷָͨ����Ϊ0��
-    TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;  // ���ϼ���ģʽ
-    TIM_TimeBaseInitStruct.TIM_Period = arr;                   // �Զ���װ��ֵ
-    TIM_TimeBaseInitStruct.TIM_Prescaler = psc;                // Ԥ��Ƶֵ
+    // ====== 配置定时器基本参数 ======
+    TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;              // 时钟分割（通常设为0）
+    TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;  // 向上计数模式
+    TIM_TimeBaseInitStruct.TIM_Period = arr;                   // 自动重装载值
+    TIM_TimeBaseInitStruct.TIM_Prescaler = psc;                // 预分频值
 
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
 
-    // ʹ�ܸ����жϺʹ����ж�
+    // 使能更新中断和触发中断
     TIM_ITConfig(TIM3, TIM_IT_Update | TIM_IT_Trigger, ENABLE);
 
-    // ====== ����NVIC�ж����ȼ� ======
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;              // TIM3�ж�ͨ��
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;   // ��ռ���ȼ�
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;          // ��Ӧ���ȼ�
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;             // ʹ���ж�
+    // ====== 配置NVIC中断优先级 ======
+    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;              // TIM3中断通道
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;   // 抢占优先级
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;          // 响应优先级
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;             // 使能中断
 
     NVIC_Init(&NVIC_InitStructure);
 
-    // ������ʱ��
+    // 启动定时器
     TIM_Cmd(TIM3, ENABLE);
 }
-// ��������ʱ����PWM�ź�
+// 用软件延时产生PWM信号
 
 void Servo_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  // �ĳ�GPIOB
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  // 改成GPIOB
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;  // �ĳ�Pin_2
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;  // 改成Pin_2
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);  // �ĳ�GPIOB
+    GPIO_Init(GPIOA, &GPIO_InitStructure);  // 改成GPIOB
 }
 
 void Servo_SetAngle(uint16_t angle)
 {
     uint16_t pulse;
 
-    // �Ƕ��޷�
+    // 角度限幅
     if(angle > 180) angle = 180;
 
-    // �Ƕ�ת����
+    // 角度转脉宽
     pulse = PWM_MIN + (angle * 2000 / 180);
 
-    // ���ñȽ�ֵ���޸�ռ�ձȣ�
+    // 设置比较值（修改占空比）
     TIM_SetCompare1(TIM2, pulse); //20ms
 }
 int main(void)
@@ -182,13 +179,13 @@ int main(void)
 
 void TIM3_IRQHandler(void)
 {
-    // ����Ƿ��Ǹ����ж�
+    // 检查是否是更新中断
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
-        // ��ת��־λ
+        // 翻转标志位
         time_1000ms++;
         if(time_1000ms == 1000) time_1000ms = 0;
-        // ����жϱ�־λ����Ҫ����
+        // 清除中断标志位（重要！）
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
 
