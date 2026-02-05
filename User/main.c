@@ -4,9 +4,12 @@
 * Version            : V1.0.0
 * Date               : 2021/06/06
 * Description        : Main program body.
+*
+* Gitç‰ˆæœ¬æŽ§åˆ¶æ¼”ç¤º - è¿™æ˜¯ç¬¬äºŒæ¬¡æäº¤çš„ä¿®æ”¹
+*
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
@@ -42,30 +45,30 @@ void TIM2_PWM_Init(void)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = {0};
     TIM_OCInitTypeDef TIM_OCInitStructure = {0};
 
-    // Ê¹ÄÜTIM2Ê±ÖÓ
+    // Ê¹ï¿½ï¿½TIM2Ê±ï¿½ï¿½
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
-    // ====== ÅäÖÃ¶¨Ê±Æ÷»ù±¾²ÎÊý ======
-    TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;  // ×Ô¶¯ÖØ×°ÔØÖµ 19999
-    TIM_TimeBaseStructure.TIM_Prescaler = 96 - 1;       // Ô¤·ÖÆµÆ÷ 95£¨96MHz¡ú1MHz£©
+    // ====== ï¿½ï¿½ï¿½Ã¶ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ======
+    TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;  // ï¿½Ô¶ï¿½ï¿½ï¿½×°ï¿½ï¿½Öµ 19999
+    TIM_TimeBaseStructure.TIM_Prescaler = 96 - 1;       // Ô¤ï¿½ï¿½Æµï¿½ï¿½ 95ï¿½ï¿½96MHzï¿½ï¿½1MHzï¿½ï¿½
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ÏòÉÏ¼ÆÊý
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  // ï¿½ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
-    // ====== ÅäÖÃPWMÄ£Ê½ ======
+    // ====== ï¿½ï¿½ï¿½ï¿½PWMÄ£Ê½ ======
     TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;         // PWMÄ£Ê½1
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;  // Êä³öÊ¹ÄÜ
-    TIM_OCInitStructure.TIM_Pulse = PWM_MIN;                  // ³õÊ¼Âö¿í£¨0¶È£©
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // ¸ßµçÆ½ÓÐÐ§
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;  // ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
+    TIM_OCInitStructure.TIM_Pulse = PWM_MIN;                  // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½È£ï¿½
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // ï¿½ßµï¿½Æ½ï¿½ï¿½Ð§
 
-    // ÅäÖÃTIM2Í¨µÀ1
+    // ï¿½ï¿½ï¿½ï¿½TIM2Í¨ï¿½ï¿½1
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
-    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);  // Ê¹ÄÜÔ¤×°ÔØ
+    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);  // Ê¹ï¿½ï¿½Ô¤×°ï¿½ï¿½
 
-    // Ê¹ÄÜ×Ô¶¯ÖØ×°ÔØÔ¤×°ÔØ
+    // Ê¹ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½×°ï¿½ï¿½Ô¤×°ï¿½ï¿½
     TIM_ARRPreloadConfig(TIM2, ENABLE);
 
-    // Æô¶¯¶¨Ê±Æ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     TIM_Cmd(TIM2, ENABLE);
 }
 
@@ -75,12 +78,12 @@ void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void LED_Test_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  // ¸Ä³ÉGPIOB
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);  // ï¿½Ä³ï¿½GPIOB
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;  // ¸Ä³ÉPin_2
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;  // ï¿½Ä³ï¿½Pin_2
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);  // ¸Ä³ÉGPIOB
+    GPIO_Init(GPIOC, &GPIO_InitStructure);  // ï¿½Ä³ï¿½GPIOB
 }
 
 void Tim3_Init(u16 arr, u16 psc)
@@ -88,55 +91,55 @@ void Tim3_Init(u16 arr, u16 psc)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct = {0};
     NVIC_InitTypeDef NVIC_InitStructure = {0};
 
-    // Ê¹ÄÜTIM3Ê±ÖÓ
+    // Ê¹ï¿½ï¿½TIM3Ê±ï¿½ï¿½
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-    // ====== ÅäÖÃ¶¨Ê±Æ÷»ù±¾²ÎÊý ======
-    TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;              // Ê±ÖÓ·Ö¸î£¨Í¨³£ÉèÎª0£©
-    TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;  // ÏòÉÏ¼ÆÊýÄ£Ê½
-    TIM_TimeBaseInitStruct.TIM_Period = arr;                   // ×Ô¶¯ÖØ×°ÔØÖµ
-    TIM_TimeBaseInitStruct.TIM_Prescaler = psc;                // Ô¤·ÖÆµÖµ
+    // ====== ï¿½ï¿½ï¿½Ã¶ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ======
+    TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;              // Ê±ï¿½Ó·Ö¸î£¨Í¨ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½
+    TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;  // ï¿½ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½Ä£Ê½
+    TIM_TimeBaseInitStruct.TIM_Period = arr;                   // ï¿½Ô¶ï¿½ï¿½ï¿½×°ï¿½ï¿½Öµ
+    TIM_TimeBaseInitStruct.TIM_Prescaler = psc;                // Ô¤ï¿½ï¿½ÆµÖµ
 
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStruct);
 
-    // Ê¹ÄÜ¸üÐÂÖÐ¶ÏºÍ´¥·¢ÖÐ¶Ï
+    // Ê¹ï¿½Ü¸ï¿½ï¿½ï¿½ï¿½Ð¶ÏºÍ´ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
     TIM_ITConfig(TIM3, TIM_IT_Update | TIM_IT_Trigger, ENABLE);
 
-    // ====== ÅäÖÃNVICÖÐ¶ÏÓÅÏÈ¼¶ ======
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;              // TIM3ÖÐ¶ÏÍ¨µÀ
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;   // ÇÀÕ¼ÓÅÏÈ¼¶
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;          // ÏìÓ¦ÓÅÏÈ¼¶
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;             // Ê¹ÄÜÖÐ¶Ï
+    // ====== ï¿½ï¿½ï¿½ï¿½NVICï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½ ======
+    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;              // TIM3ï¿½Ð¶ï¿½Í¨ï¿½ï¿½
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;   // ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½È¼ï¿½
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;          // ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½È¼ï¿½
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;             // Ê¹ï¿½ï¿½ï¿½Ð¶ï¿½
 
     NVIC_Init(&NVIC_InitStructure);
 
-    // Æô¶¯¶¨Ê±Æ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     TIM_Cmd(TIM3, ENABLE);
 }
-// ÓÃÈí¼þÑÓÊ±²úÉúPWMÐÅºÅ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½PWMï¿½Åºï¿½
 
 void Servo_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  // ¸Ä³ÉGPIOB
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  // ï¿½Ä³ï¿½GPIOB
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;  // ¸Ä³ÉPin_2
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;  // ï¿½Ä³ï¿½Pin_2
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);  // ¸Ä³ÉGPIOB
+    GPIO_Init(GPIOA, &GPIO_InitStructure);  // ï¿½Ä³ï¿½GPIOB
 }
 
 void Servo_SetAngle(uint16_t angle)
 {
     uint16_t pulse;
 
-    // ½Ç¶ÈÏÞ·ù
+    // ï¿½Ç¶ï¿½ï¿½Þ·ï¿½
     if(angle > 180) angle = 180;
 
-    // ½Ç¶È×ªÂö¿í
+    // ï¿½Ç¶ï¿½×ªï¿½ï¿½ï¿½ï¿½
     pulse = PWM_MIN + (angle * 2000 / 180);
 
-    // ÉèÖÃ±È½ÏÖµ£¨ÐÞ¸ÄÕ¼¿Õ±È£©
+    // ï¿½ï¿½ï¿½Ã±È½ï¿½Öµï¿½ï¿½ï¿½Þ¸ï¿½Õ¼ï¿½Õ±È£ï¿½
     TIM_SetCompare1(TIM2, pulse); //20ms
 }
 int main(void)
@@ -179,13 +182,13 @@ int main(void)
 
 void TIM3_IRQHandler(void)
 {
-    // ¼ì²éÊÇ·ñÊÇ¸üÐÂÖÐ¶Ï
+    // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
-        // ·­×ª±êÖ¾Î»
+        // ï¿½ï¿½×ªï¿½ï¿½Ö¾Î»
         time_1000ms++;
         if(time_1000ms == 1000) time_1000ms = 0;
-        // Çå³ýÖÐ¶Ï±êÖ¾Î»£¨ÖØÒª£¡£©
+        // ï¿½ï¿½ï¿½ï¿½Ð¶Ï±ï¿½Ö¾Î»ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
 
