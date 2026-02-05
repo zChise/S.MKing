@@ -17,16 +17,18 @@
  This example demonstrates using USART1(PA9) as a print debug port output.
 
 */
-
+unsigned char task_num;
+unsigned long int uwtick;
 #include "debug.h"
 #include "picture.h"
 #include "lcd.h"
+#include "key.h"
 /* Global typedef */
 
 /* Global define */
 
 /* Global Variable */
-
+u8 key_val,key_old,key_down,key_up;  //按键相关变量
 
 /*********************************************************************
  * @fn      main
@@ -141,8 +143,80 @@ void Servo_SetAngle(uint16_t angle)
     TIM_SetCompare1(TIM2, pulse); //20ms
 }
 
+
+void lcd_proc()
+{
+
+
+    }
+
+void key_proc()
+{
+
+    key_val=key_read();
+    key_down=key_val&(key_val^key_old);
+    key_up=~key_val&(key_val^key_old);
+    key_old=key_val;
+
+    switch(key_down)
+    {
+    case 1:
+        lcd_show_chinese(20,25,"欢迎回家",RED,WHITE,16,0);
+        break;
+    case 2:
+        lcd_show_chinese(20,25,"正在启动",RED,WHITE,16,0);
+        break;
+    case 3:
+    lcd_show_chinese(20,25,"我爱你中国",RED,WHITE,16,0);
+        break;
+    case 10:
+        lcd_show_chinese(20,25,"门已开启",RED,WHITE,16,0);
+        break;
+
+    }
+}
+
+typedef struct
+{
+    void (*task_func)(void);//任务函数
+    unsigned long int rate_ms;  //任务执行周期
+    unsigned long int last_run; //任务上次运行的时间
+}task_t;
+
+task_t scheduler_task[]={
+        {lcd_proc,100,0},//屏幕处理函数，100毫秒执行一次，0秒开始执行
+        {key_proc,10,0},//按键处理函数，10毫秒执行一次，0秒开始执行
+//        {lock_proc,30,0},//门锁处理函数（舵机开关）
+//        {as608_proc,20,0},
+//        {esp8266_proc,2,0},
+};
+
+
+
+void scheduler_init()
+{
+    task_num=sizeof(scheduler_task)/sizeof(task_t);  //计算任务数量
+}
+void scheduler_run()
+{
+    unsigned char i;
+    for(i=0;i<task_num;i++)
+    {
+        unsigned long int now_time=uwtick;  //更新当前系统时间
+        if(now_time> (scheduler_task[i].last_run+scheduler_task[i].rate_ms) )
+        {
+            scheduler_task[i].last_run=now_time;//记录本次运行时间
+            scheduler_task[i].task_func();//运行任务
+        }
+    }
+}
+
+
+
+
 int main(void)
 {
+    key_init();
     LCD_Init();
     TIM2_PWM_Init();
     Servo_Init();
@@ -159,16 +233,18 @@ int main(void)
     LCD_ShowPicture(0,0,127,127,gImage_hutao);
     lcd_show_chinese(20,50,"外星人电解水",RED,WHITE,16,0);//开机显示
 
+    scheduler_init();
+//    for(i = 0; i<= 128; i++)
+//    {
+//        LCD_DrawLine(0,80,i,80,BLACK);
+//        LCD_DrawLine(0,81,i,81,BLACK);
+//        LCD_DrawLine(0,82,i,82,BLACK);
+//        LCD_DrawLine(0,83,i,83,BLACK);
+//        LCD_DrawLine(0,84,i,84,BLACK);
+//        Delay_Ms(10);
+//    }
 
-    for(i = 0; i<= 128; i++)
-    {
-        LCD_DrawLine(0,80,i,80,BLACK);
-        LCD_DrawLine(0,81,i,81,BLACK);
-        LCD_DrawLine(0,82,i,82,BLACK);
-        LCD_DrawLine(0,83,i,83,BLACK);
-        LCD_DrawLine(0,84,i,84,BLACK);
-        Delay_Ms(10);
-    }
+
 
 	while(1)
     {
@@ -190,9 +266,13 @@ int main(void)
 //	        Delay_Us(500);
 //	        GPIO_SetBits(GPIOC, GPIO_Pin_1);
 	    }
-
+	    scheduler_run();
 	}
 }
+
+
+
+
 
 
 void TIM3_IRQHandler(void)
@@ -200,6 +280,7 @@ void TIM3_IRQHandler(void)
     // 检查是否是更新中断
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
+        uwtick++;
         // 翻转标志位
         time_1000ms++;
         if(time_1000ms == 1000) time_1000ms = 0;
