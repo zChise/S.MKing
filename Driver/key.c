@@ -4,7 +4,9 @@
  *  Created on: 2026年2月5日
  *      Author: Elaina
  */
-#include "debug.h"
+#include "base.h"
+u8 key_val,key_old,key_down,key_up;  //按键相关变量
+
 void key_init()
   {
       // 配置行线1和2（PD11, PD9）为输出
@@ -63,3 +65,30 @@ u8 key_read()
 
      return temp;
  }
+void key_proc()
+{
+
+    key_val=key_read();
+    key_down=key_val&(key_val^key_old);
+    key_up=~key_val&(key_val^key_old);
+    key_old=key_val;
+
+    switch(key_down)
+    {
+    case 1:
+        lcd_show_chinese(20,25,"欢迎回家",RED,WHITE,16,0);
+        audio_play(1);
+        break;
+    case 2:
+        lcd_show_chinese(20,25,"正在启动",RED,WHITE,16,0);
+        audio_play(5);
+        break;
+    case 3:
+    lcd_show_chinese(20,25,"我爱你中国",RED,WHITE,16,0);
+        break;
+    case 10:
+        lcd_show_chinese(20,25,"门已开启",RED,WHITE,16,0);
+        break;
+
+    }
+}

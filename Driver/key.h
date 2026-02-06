@@ -7,7 +7,7 @@
 
 #ifndef DRIVER_KEY_H_
 #define DRIVER_KEY_H_
-
+void key_proc();
 void key_init();
 u8 key_read();
 

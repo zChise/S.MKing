@@ -4,9 +4,7 @@
  *  Created on: 2026Äê2ÔÂ5ÈÕ
  *      Author: Elaina
  */
-#include "picture.h"
-#include "debug.h"
-#include "lcd.h"
+#include "base.h"
 #include "font_ascii_16x8.h"
 void  SPI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
