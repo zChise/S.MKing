@@ -48,4 +48,23 @@ void UART3_GPIO_Init(void)
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
+void UART2_GPIO_Init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+
+    // 使能GPIOA和UART2时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
+    // PA2配置为复用推挽输出（TX）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;           //
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;     // 复用推挽
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    // PA3配置为浮空输入（RX）
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;           //
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; // 浮空输入
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
 

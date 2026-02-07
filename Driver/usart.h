@@ -9,5 +9,6 @@
 #define DRIVER_USART_H_
 
 void UART3_Init(u32 baudrate);
+void UART2_Init(u32 baudrate);
 
 #endif /* DRIVER_USART_H_ */

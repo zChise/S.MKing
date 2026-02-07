@@ -38,13 +38,18 @@ unsigned long int uwtick;
 u16 i = 0;
 u16 time_1000ms;
 void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-
-
-
+void USART2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+u8 rfid_index = 0;
+u8 rfid_verify[] = {0x04, 0x0C, 0x02, 0x30, 0x00, 0x04, 0x00};
+u8 rfid_temp[50];
+u8 rfid_val[6];
+u8 rfid_store_index = 0;
+u8 rfid_val_index;
+u8 mode;  //mode = 2 --> rfid
+u8 rfid_match_flag;
 // 用软件延时产生PWM信号
-
-
-
+u8 xieru = 1;
+u8 z;
 void Servo_SetAngle(uint16_t angle)
 {
     uint16_t pulse;
@@ -61,18 +66,14 @@ void Servo_SetAngle(uint16_t angle)
 
 
 
-
-
-
-
-
-
 int main(void)
 {
 
-    audio_init();
+    UART2_Init(115200);
+    audio_init();// usart3
     USART_ClearFlag(USART3, USART_FLAG_TC);
-    audio_sound(10);
+    audio_sound(20);
+    audio_play(1);
     key_init();
     LCD_Init();
     TIM2_PWM_Init();
@@ -82,6 +83,7 @@ int main(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	SystemCoreClockUpdate();
 	USART_Printf_Init(115200);	
+	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	printf("SystemClk:%d\r\n",SystemCoreClock);
 	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 	printf("This is printf example\r\n");
@@ -124,7 +126,16 @@ int main(void)
 //	        GPIO_SetBits(GPIOC, GPIO_Pin_1);
 	    }
 	    scheduler_run();
-	}
+
+	        if(rfid_match_flag == 1)  // 匹配成功
+	        {
+	            lcd_show_chinese(20,25,"门已开启",RED,WHITE,16,0);
+//	            audio_play(2);  // 播放开锁音效
+//	            // 舵机开锁逻辑
+	            rfid_match_flag = 0;  // 清除标志
+	        }
+
+}
 }
 
 
@@ -147,5 +158,62 @@ void TIM3_IRQHandler(void)
 
 }
 
+void USART2_IRQHandler(void)
+  {
+
+      u8 temp = USART_ReceiveData(USART2);  // 读取一个字节
+      //04 0C 02 30 00 04 00
+      USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+      if(rfid_index <= 6)
+      {
+          if(temp == rfid_verify[rfid_index])
+          {
+             rfid_index++;
+             return;
+          }
+          rfid_index = 0;
+          return;
+      }
+
+      if(rfid_index == 7)
+      {
+          rfid_val[rfid_val_index] = temp;
+          rfid_val_index++;
+          if(rfid_val_index == 5)
+             {
+              if(xieru == 0)
+              {
+                  for(u8 j = 0; j <= rfid_store_index; j++)
+                {
+                    for(u8 i = j*5; i <= j*5 + 4; i++)
+                    {
+                       if(rfid_val[z] == rfid_temp[i]) z++;
+                       if(z == 5) rfid_match_flag = 1;
+                    }
+                    z = 0;
+                    }
+                    rfid_index = 0;
+                    rfid_val_index = 0;
+              }
+              if(xieru == 1)
+              {
+                  rfid_store_index++;
+                  u16 zzz = 0;
+                  for (i = rfid_store_index*5; i <= rfid_store_index*5 + 4 ; i++)
+                  {
+                    rfid_temp[i] = rfid_val[zzz];
+                    zzz++;
+                  }
+                  lcd_show_chinese(20,25,"欢迎回家",RED,WHITE,16,0);
+                  xieru = 0;
+                  rfid_index = 0;
+                  rfid_val_index = 0;
+              }
+             }
+          return;
+      }
+
+
+    }
 
 
