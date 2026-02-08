@@ -75,9 +75,7 @@ u8 old;
 void as608_play(u8 addr)
   {
     PS_GetImage();
-    printf("play1\r\n");
     as608_wait();
-    printf("play2\r\n");
     PS_GenChar(1);
     as608_wait();
     PS_GetImage();
@@ -106,5 +104,6 @@ void as608_search()
     {
         lcd_show_chinese(20,15,"»¶Ó­»Ø¼Ò",RED,WHITE,16,0);
     }
+    Delay_Ms(1000);
 }
 

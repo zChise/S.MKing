@@ -145,10 +145,7 @@ int main(void)
 	        {
                 if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
                 {
-
-                    printf("play start\r\n");
                     as608_play(1);
-                    printf("play done\r\n");
                     lcd_show_chinese(20,95,"中国",RED,WHITE,16,0);
                     as608_flaggg = 0;
                     Delay_Ms(1000);
@@ -246,7 +243,7 @@ void USART2_IRQHandler(void)
     }
 
 
-void UsART7_IRQHandler(void)
+void UART7_IRQHandler(void)
 {
     // 溢出错误：读SR再读DR清掉，否则中断卡死
     if(USART_GetFlagStatus(UART7, USART_FLAG_ORE) != RESET)
