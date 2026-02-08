@@ -24,8 +24,9 @@
 /* Global define */
 
 /* Global Variable */
-unsigned long int uwtick;
-
+  volatile unsigned long int uwtick;
+  volatile unsigned long int uart7_rec_tick;
+  volatile unsigned long int as608_time;
 /*********************************************************************
  * @fn      main
  *
@@ -39,6 +40,7 @@ u16 i = 0;
 u16 time_1000ms;
 void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void USART2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void UART7_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 u8 rfid_index = 0;
 u8 rfid_verify[] = {0x04, 0x0C, 0x02, 0x30, 0x00, 0x04, 0x00};
 u8 rfid_temp[50];
@@ -50,6 +52,10 @@ u8 rfid_match_flag;
 // 用软件延时产生PWM信号
 u8 xieru = 1;
 u8 z;
+volatile u8 uart7_index;
+
+u8 uart7_temp[30];
+u8 as608_flaggg = 1;
 void Servo_SetAngle(uint16_t angle)
 {
     uint16_t pulse;
@@ -65,10 +71,10 @@ void Servo_SetAngle(uint16_t angle)
 }
 
 
-
 int main(void)
 {
-
+    As608_Gpio_Init();
+    UART7_Init(115200);
     UART2_Init(115200);
     audio_init();// usart3
     USART_ClearFlag(USART3, USART_FLAG_TC);
@@ -135,7 +141,29 @@ int main(void)
 	            rfid_match_flag = 0;  // 清除标志
 	        }
 
-}
+	        if(as608_flaggg == 1)
+	        {
+                if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
+                {
+
+                    printf("play start\r\n");
+                    as608_play(1);
+                    printf("play done\r\n");
+                    lcd_show_chinese(20,95,"中国",RED,WHITE,16,0);
+                    as608_flaggg = 0;
+                    Delay_Ms(1000);
+                }
+	        }
+	        if(as608_flaggg == 0)
+	        {
+                if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
+                {
+                    as608_search();
+
+                }
+	        }
+
+    }
 }
 
 
@@ -149,6 +177,7 @@ void TIM3_IRQHandler(void)
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
         uwtick++;
+        uart7_rec_tick++;
         // 翻转标志位
         time_1000ms++;
         if(time_1000ms == 1000) time_1000ms = 0;
@@ -216,4 +245,26 @@ void USART2_IRQHandler(void)
 
     }
 
+
+void UsART7_IRQHandler(void)
+{
+    // 溢出错误：读SR再读DR清掉，否则中断卡死
+    if(USART_GetFlagStatus(UART7, USART_FLAG_ORE) != RESET)
+    {
+        USART_ReceiveData(UART7);
+        return;
+    }
+
+    if(USART_GetITStatus(UART7, USART_IT_RXNE) != RESET)
+    {
+        u8 temp;
+        as608_time = uwtick;
+        if(uart7_rec_tick>10) uart7_index=0;
+        temp = USART_ReceiveData(UART7);
+        uart7_temp[uart7_index] = temp;
+        uart7_index++;
+        uart7_rec_tick=0;
+        USART_ClearITPendingBit(UART7, USART_IT_RXNE);
+    }
+}
 
