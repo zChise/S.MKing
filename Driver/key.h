@@ -10,5 +10,5 @@
 void key_proc();
 void key_init();
 u8 key_read();
-
+void key_clear();
 #endif /* DRIVER_KEY_H_ */

@@ -34,7 +34,7 @@
  *
  * @return  none
  */
-#define PWM_MIN 500
+
 #define PWM_PERIOD 20000
 u16 i = 0;
 u16 time_1000ms;
@@ -45,34 +45,27 @@ u8 rfid_index = 0;
 u8 rfid_verify[] = {0x04, 0x0C, 0x02, 0x30, 0x00, 0x04, 0x00};
 u8 rfid_temp[50];
 u8 rfid_val[6];
-u8 rfid_store_index = 0;
+u8 rfid_store_index;
 u8 rfid_val_index;
-u8 mode;  //mode = 2 --> rfid
+u8 mode;  //mode = 2 --> rfid  1 --> cmd  0 --> static  mode 5 修改密码ing
 u8 rfid_match_flag;
 // 用软件延时产生PWM信号
 u8 xieru = 1;
-u8 z;
+u32 time15000;
 volatile u8 uart7_index;
-
 u8 uart7_temp[30];
 u8 as608_flaggg = 1;
-void Servo_SetAngle(uint16_t angle)
-{
-    uint16_t pulse;
-
-    // 角度限幅
-    if(angle > 180) angle = 180;
-
-    // 角度转脉宽
-    pulse = PWM_MIN + (angle * 2000 / 180);
-
-    // 设置比较值（修改占空比）
-    TIM_SetCompare1(TIM2, pulse); //20ms
-}
+u8 password_now[6];
+u8 password_val[6] = {10,10,40,50,10,40};
+u8 z;
+u16 time_3000;
+u16 time_5000;
+u8 key_flag;
 
 
 int main(void)
 {
+    AT24C02_Init();
     As608_Gpio_Init();
     UART7_Init(115200);
     UART2_Init(115200);
@@ -90,14 +83,19 @@ int main(void)
 	SystemCoreClockUpdate();
 	USART_Printf_Init(115200);	
 	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-	printf("SystemClk:%d\r\n",SystemCoreClock);
-	printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
-	printf("This is printf example\r\n");
+
+
+	EEPROM_Read(password_now,0x00,6);
+	EEPROM_Read(&rfid_store_index,0x07,1);
+	EEPROM_Read(rfid_temp,0x10,50);
+
 	LED_Test_Init();
     LCD_Fill(0,0,128,128,WHITE);//整个屏幕填充白色
     LCD_ShowPicture(0,0,127,127,gImage_hutao);
     lcd_show_chinese(20,50,"外星人电解水",RED,WHITE,16,0);//开机显示
-
+    LCD_ShowPicture(0,0,128,128,gImage_2);
+    LCD_Fill(16,45,112,66,YELLOW);//填充黄色背景
+    Servo_SetAngle(0);
     scheduler_init();
 //    for(i = 0; i<= 128; i++)
 //    {
@@ -113,52 +111,10 @@ int main(void)
 
 	while(1)
     {
-	    if(time_1000ms <= 500)
-	    {
-	        Servo_SetAngle(90);
-//	        GPIO_ResetBits(GPIOA, GPIO_Pin_0);
-//            Delay_Ms(20);
-//            GPIO_SetBits(GPIOA, GPIO_Pin_0);
-//            Delay_Us(1500);
-//	        GPIO_ResetBits(GPIOC, GPIO_Pin_1);
-	    }
-	    if(time_1000ms > 500)
-	    {
-	        Servo_SetAngle(0);
-//	        GPIO_ResetBits(GPIOA, GPIO_Pin_0);
-//	        Delay_Ms(20);
-//	        GPIO_SetBits(GPIOA, GPIO_Pin_0);
-//	        Delay_Us(500);
-//	        GPIO_SetBits(GPIOC, GPIO_Pin_1);
-	    }
+
 	    scheduler_run();
 
-	        if(rfid_match_flag == 1)  // 匹配成功
-	        {
-	            lcd_show_chinese(20,25,"门已开启",RED,WHITE,16,0);
-//	            audio_play(2);  // 播放开锁音效
-//	            // 舵机开锁逻辑
-	            rfid_match_flag = 0;  // 清除标志
-	        }
 
-	        if(as608_flaggg == 1)
-	        {
-                if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
-                {
-                    as608_play(1);
-                    lcd_show_chinese(20,95,"中国",RED,WHITE,16,0);
-                    as608_flaggg = 0;
-                    Delay_Ms(1000);
-                }
-	        }
-	        if(as608_flaggg == 0)
-	        {
-                if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
-                {
-                    as608_search();
-
-                }
-	        }
 
     }
 }
@@ -173,6 +129,48 @@ void TIM3_IRQHandler(void)
     // 检查是否是更新中断
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
+        if(password_error == 3)
+        {
+            time15000++;
+            if(time15000 >= 15000)
+                {
+                    password_error = 2;
+                    time15000 = 0;
+                }
+        }
+        if(servo_flag == 1)
+        {
+            time_5000++;
+            if(time_5000 >= 5000)
+                {
+                    Servo_SetAngle(0);
+                    time_5000 = 0;
+                    servo_flag = 0;
+                }
+
+        }
+        if(key_down == 15) key_flag = 1;
+        if(key_up == 15)
+        {
+            key_flag = 0;
+            time_3000 = 0;
+        }
+
+        if(key_flag == 1)
+        {
+            time_3000++;
+        }
+        if(time_3000 >= 3000)
+        {
+            if(mode == 1) mode = 0;
+            if(mode == 2) mode = 0;
+            if(mode == 3) mode = 0;
+            if(mode == 6) mode = 0;
+            key_flag = 0;
+            time_3000 = 0;
+            key_clear();
+        }
+
         uwtick++;
         uart7_rec_tick++;
         // 翻转标志位
@@ -207,21 +205,39 @@ void USART2_IRQHandler(void)
           rfid_val_index++;
           if(rfid_val_index == 5)
              {
-              if(xieru == 0)
+              z = 0;
+              if(mode == 0)
               {
                   for(u8 j = 0; j <= rfid_store_index; j++)
                 {
-                    for(u8 i = j*5; i <= j*5 + 4; i++)
+                    for(u8 i = j*5; i <= (j*5 + 4); i++)
                     {
                        if(rfid_val[z] == rfid_temp[i]) z++;
-                       if(z == 5) rfid_match_flag = 1;
+
+                       }
+                    if(z == 5)
+                          {
+                              servo_flag = 1;
+                              Servo_SetAngle(90);
+
+                              rfid_index = 0;
+                              rfid_val_index = 0;
+                              lcd_show_chinese(20,50,"电星人",RED,WHITE,16,0);
+                              return;
+                          }
+
+                          if(z != 5)
+                          {
+                              lcd_show_chinese(20,50,"正国电",RED,WHITE,16,0);
+
+
                     }
-                    z = 0;
-                    }
+                   z = 0;
                     rfid_index = 0;
                     rfid_val_index = 0;
               }
-              if(xieru == 1)
+              }
+              if(mode == 6)
               {
                   rfid_store_index++;
                   u16 zzz = 0;
@@ -230,8 +246,7 @@ void USART2_IRQHandler(void)
                     rfid_temp[i] = rfid_val[zzz];
                     zzz++;
                   }
-                  lcd_show_chinese(20,25,"欢迎回家",RED,WHITE,16,0);
-                  xieru = 0;
+                  mode = 0;
                   rfid_index = 0;
                   rfid_val_index = 0;
               }

@@ -6,7 +6,12 @@
  */
 #include "base.h"
 u8 key_val,key_old,key_down,key_up;  //按键相关变量
-
+u8 key_val_index;
+u8 password_flag;
+u8 fill_flag = 1;
+u8 password_cmd[6] = {1,9,1,9,8,1};
+u8 password_error;
+u8 servo_flag;
 void key_init()
   {
       // 配置行线1和2（PD11, PD9）为输出
@@ -65,30 +70,192 @@ u8 key_read()
 
      return temp;
  }
+
+void key_clear()
+{
+    memset(password_val,10,6);
+    key_val_index=0;
+    fill_flag = 1;
+}
 void key_proc()
 {
 
+    password_flag = 0;
     key_val=key_read();
     key_down=key_val&(key_val^key_old);
     key_up=~key_val&(key_val^key_old);
     key_old=key_val;
 
+    if(password_error >= 3) return;
+
     switch(key_down)
     {
     case 1:
-        lcd_show_chinese(20,25,"欢迎回家",RED,WHITE,16,0);
-        audio_play(1);
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 1;
+        key_val_index++;
         break;
     case 2:
-        lcd_show_chinese(20,25,"正在启动",RED,WHITE,16,0);
-        audio_play(5);
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 2;
+        key_val_index++;
         break;
     case 3:
-    lcd_show_chinese(20,25,"我爱你中国",RED,WHITE,16,0);
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 3;
+        key_val_index++;
+        break;
+    case 4:
+        mode = 1;
+        key_clear();
+
+        break;
+    case 5:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 4;
+        key_val_index++;
+        break;
+    case 6:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 5;
+        key_val_index++;
+        break;
+    case 7:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 6;
+        key_val_index++;
+        break;
+    case 8:
+         mode = 3;
+        break;
+    case 9:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 7;
+        key_val_index++;
         break;
     case 10:
-        lcd_show_chinese(20,25,"门已开启",RED,WHITE,16,0);
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 8;
+        key_val_index++;
         break;
+    case 11:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 9;
+        key_val_index++;
+        break;
+    case 12:
+        mode = 2;
+        key_clear();
+        break;
+    case 13:
+        key_clear();
+        break;
+    case 14:
+        if(key_val_index == 6) break;
+        password_val[key_val_index] = 0;
+        key_val_index++;
+        break;
+    case 15:
+        if(key_val_index >= 1)
+        {
+            key_val_index--;
+            password_val[key_val_index] = 10;
+            fill_flag = 1;
+        }
+        break;
+    case 16:
+        if (mode == 0) {
+            for (u8 i = 0; i < 6; i++)
+            {
+                if(password_val[i] == password_now[i]) password_flag++;
+            }
+            if(password_flag == 6)
+                {
+                    lcd_show_chinese(20,50,"外星人电解水",RED,WHITE,16,0);
+                    Delay_Ms(200);
+                    password_error = 0;
+                    Servo_SetAngle(90);
+                    servo_flag = 1;
+                }
 
+            if(password_flag != 6)
+                {
+                    lcd_show_chinese(20,50,"门已开启",RED,WHITE,16,0);
+                     Delay_Ms(200);
+                     password_error++;
+                }
+        }
+
+        if (mode == 1) {
+            for (u8 i = 0; i < 6; i++)
+            {
+                if(password_val[i] == password_cmd[i]) password_flag++;
+            }
+                if(password_flag == 6)
+                    {
+                        lcd_show_chinese(20,50,"中国人",RED,WHITE,16,0);
+                        mode = 5;
+                        password_error = 0;
+                    }
+                if(password_flag != 6)
+                    {
+                        lcd_show_chinese(20,50,"水星人",RED,WHITE,16,0);
+                        password_error++;
+                    }
+                key_clear();
+                return;
+        }
+
+        if (mode == 2) {
+            for (u8 i = 0; i < 6; i++)
+            {
+                if(password_val[i] == password_cmd[i]) password_flag++;
+            }
+                if(password_flag == 6)
+                    {
+                        lcd_show_chinese(20,50,"中国人",RED,WHITE,16,0);
+                        mode = 6;
+                        password_error = 0;
+                    }
+                if(password_flag != 6)
+                    {
+                        lcd_show_chinese(20,50,"水星人",RED,WHITE,16,0);
+                        password_error++;
+                    }
+                key_clear();
+                return;
+        }
+        if (mode == 3) {
+            for (u8 i = 0; i < 6; i++)
+            {
+                if(password_val[i] == password_cmd[i]) password_flag++;
+            }
+                if(password_flag == 6)
+                    {
+                        lcd_show_chinese(20,50,"中国人",RED,WHITE,16,0);
+                        mode = 7;
+                        password_error = 0;
+                    }
+                if(password_flag != 6)
+                    {
+                        lcd_show_chinese(20,50,"水星人",RED,WHITE,16,0);
+                        password_error++;
+                    }
+                key_clear();
+                return;
+        }
+            if (mode == 5) {
+                for (u8 i = 0; i < 6; i++)
+                {
+                    password_now[i] = password_val[i];
+                }
+                lcd_show_chinese(20,50,"开水门",RED,WHITE,16,0);
+                mode = 0;
+            }
+
+
+        key_clear();
+        break;
     }
+
 }

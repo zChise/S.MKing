@@ -99,11 +99,32 @@ void as608_search()
     if(uart7_temp[13]>50)//匹配
     {
         lcd_show_chinese(20,15,"我爱你中国",RED,WHITE,16,0);
+        servo_flag = 1;
+        Servo_SetAngle(90);
     }
     else
     {
         lcd_show_chinese(20,15,"欢迎回家",RED,WHITE,16,0);
     }
-    Delay_Ms(1000);
+
 }
 
+void as608_proc()
+{
+    if(mode == 0)
+    {
+        if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
+          {
+              as608_search();
+          }
+    }
+    if(mode == 7)
+    {
+        if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == 1)
+          {
+//              as608_play(2);
+              lcd_show_chinese(20,95,"中国",RED,WHITE,16,0);
+              mode = 0;
+          }
+    }
+}
