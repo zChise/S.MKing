@@ -12,7 +12,7 @@ void lcd_proc()
  u8 i = key_val_index;
  if(fill_flag == 1)
  {
-     LCD_Fill(16,45,112,66,YELLOW);//Ìî³ä»ÆÉ«±³¾°
+     LCD_Fill(16,45,112,66,YELLOW);
      fill_flag = 0;
  }
 

@@ -6,10 +6,8 @@
  */
 #include "base.h"
 
-
-
   void audio_init() {
-      UART3_Init(9600);  // 初始化串口3，用于控制语音模块
+      UART3_Init(9600);
   }
 
   void audio_play(u8 num)

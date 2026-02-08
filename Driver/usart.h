@@ -1,7 +1,7 @@
 /*
  * usart.h
  *
- *  Created on: 2026Äê2ÔÂ6ÈÕ
+ *  Created on: 2026ï¿½ï¿½2ï¿½ï¿½6ï¿½ï¿½
  *      Author: Elaina
  */
 
@@ -11,4 +11,5 @@
 void UART3_Init(u32 baudrate);
 void UART2_Init(u32 baudrate);
 void UART7_Init(u32 baudrate);
+void UART6_Init(u32 baudrate);
 #endif /* DRIVER_USART_H_ */

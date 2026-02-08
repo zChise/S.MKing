@@ -6,34 +6,15 @@
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
-/*
- *@Note
- USART Print debugging routine:
- USART1_Tx(PA9).
- This example demonstrates using USART1(PA9) as a print debug port output.
-
-*/
-
 #include "base.h"
-/* Global typedef */
 
-/* Global define */
-
-/* Global Variable */
   volatile unsigned long int uwtick;
   volatile unsigned long int uart7_rec_tick;
   volatile unsigned long int as608_time;
-/*********************************************************************
- * @fn      main
- *
- * @brief   Main program.
- *
- * @return  none
- */
 
 #define PWM_PERIOD 20000
 u16 i = 0;
@@ -41,15 +22,15 @@ u16 time_1000ms;
 void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void USART2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void UART7_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void UART6_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 u8 rfid_index = 0;
 u8 rfid_verify[] = {0x04, 0x0C, 0x02, 0x30, 0x00, 0x04, 0x00};
 u8 rfid_temp[50];
 u8 rfid_val[6];
 u8 rfid_store_index;
 u8 rfid_val_index;
-u8 mode;  //mode = 2 --> rfid  1 --> cmd  0 --> static  mode 5 修改密码ing
+u8 mode;  // 0:主页 1:cmd 2:rfid 5:修改密码 6:录入卡片
 u8 rfid_match_flag;
-// 用软件延时产生PWM信号
 u8 xieru = 1;
 u32 time15000;
 volatile u8 uart7_index;
@@ -61,6 +42,17 @@ u8 z;
 u16 time_3000;
 u16 time_5000;
 u8 key_flag;
+u8 uart6_rec_string[256] = {0};
+volatile u8 uart6_rec_tick;
+volatile u8 uart6_rec_index;
+u8 at_rst[]="AT+RST\r\n";
+u8 at_cwmode[]="AT+CWMODE=1\r\n";
+u8 at_dhcp[]="AT+CWDHCP=1,1\r\n";
+u8 at_cwjap[]="AT+CWJAP=\"Chise\",\"Ryougi Shiki\"\r\n";
+u8 at_mqttcfg[]="AT+MQTTUSERCFG=0,1,\"ch32\",\"3139b5EoDM\",\"version=2018-10-31&res=products%2F3139b5EoDM%2Fdevices%2Fch32&et=1770790216&method=md5&sign=SUuJuZqRLHacHI91QDReig%3D%3D\",0,0,\"\"\r\n";
+u8 at_mqttconn[]="AT+MQTTCONN=0,\"mqtts.heclouds.com\",1883,1\r\n";
+u8 at_mqttsub1[]="AT+MQTTSUB=0,\"$sys/3139b5EoDM/ch32/thing/property/set\",1\r\n";
+u8 at_mqttsub2[]="AT+MQTTSUB=0,\"$sys/3139b5EoDM/ch32/thing/property/desired/set\",1\r\n";
 
 
 int main(void)
@@ -81,7 +73,7 @@ int main(void)
     Delay_Init();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	SystemCoreClockUpdate();
-	USART_Printf_Init(115200);	
+	USART_Printf_Init(115200);
 	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 
 
@@ -89,44 +81,48 @@ int main(void)
 	EEPROM_Read(&rfid_store_index,0x07,1);
 	EEPROM_Read(rfid_temp,0x10,50);
 
-	LED_Test_Init();
-    LCD_Fill(0,0,128,128,WHITE);//整个屏幕填充白色
+    LCD_Fill(0,0,128,128,WHITE);
     LCD_ShowPicture(0,0,127,127,gImage_hutao);
-    lcd_show_chinese(20,50,"外星人电解水",RED,WHITE,16,0);//开机显示
+    lcd_show_chinese(20,50,"正在启动",RED,WHITE,16,0);
+
+    esp8266_init();
+    {
+        u8 ii = 0;
+        while(ii < 128)
+        {
+            LCD_DrawLine(ii, 100, ii, 128, RED);
+            Delay_Ms(100);
+            ii++;
+            switch(ii)
+            {
+                case 1:  uart6_send_string(at_rst, sizeof(at_rst)-1); break;
+                case 10: uart6_send_string(at_cwmode, sizeof(at_cwmode)-1); break;
+                case 20: uart6_send_string(at_dhcp, sizeof(at_dhcp)-1); break;
+                case 30: uart6_send_string(at_cwjap, sizeof(at_cwjap)-1); break;
+                case 50: uart6_send_string(at_mqttcfg, sizeof(at_mqttcfg)-1); break;
+                case 70: uart6_send_string(at_mqttconn, sizeof(at_mqttconn)-1); break;
+                case 90: uart6_send_string(at_mqttsub1, sizeof(at_mqttsub1)-1); break;
+                case 110: uart6_send_string(at_mqttsub2, sizeof(at_mqttsub2)-1); break;
+            }
+        }
+    }
+    uart6_rec_index = 0;
+    memset(uart6_rec_string, 0, 256);
+
     LCD_ShowPicture(0,0,128,128,gImage_2);
-    LCD_Fill(16,45,112,66,YELLOW);//填充黄色背景
+    LCD_Fill(16,45,112,66,YELLOW);
     Servo_SetAngle(0);
     scheduler_init();
-//    for(i = 0; i<= 128; i++)
-//    {
-//        LCD_DrawLine(0,80,i,80,BLACK);
-//        LCD_DrawLine(0,81,i,81,BLACK);
-//        LCD_DrawLine(0,82,i,82,BLACK);
-//        LCD_DrawLine(0,83,i,83,BLACK);
-//        LCD_DrawLine(0,84,i,84,BLACK);
-//        Delay_Ms(10);
-//    }
-
-
 
 	while(1)
     {
-
 	    scheduler_run();
-
-
-
     }
 }
 
 
-
-
-
-
 void TIM3_IRQHandler(void)
 {
-    // 检查是否是更新中断
     if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
     {
         if(password_error == 3)
@@ -173,10 +169,9 @@ void TIM3_IRQHandler(void)
 
         uwtick++;
         uart7_rec_tick++;
-        // 翻转标志位
+        uart6_rec_tick++;
         time_1000ms++;
         if(time_1000ms == 1000) time_1000ms = 0;
-        // 清除中断标志位（重要！）
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
 
@@ -185,7 +180,7 @@ void TIM3_IRQHandler(void)
 void USART2_IRQHandler(void)
   {
 
-      u8 temp = USART_ReceiveData(USART2);  // 读取一个字节
+      u8 temp = USART_ReceiveData(USART2);
       //04 0C 02 30 00 04 00
       USART_ClearITPendingBit(USART2, USART_IT_RXNE);
       if(rfid_index <= 6)
@@ -222,13 +217,13 @@ void USART2_IRQHandler(void)
 
                               rfid_index = 0;
                               rfid_val_index = 0;
-                              lcd_show_chinese(20,50,"电星人",RED,WHITE,16,0);
+                              lcd_show_chinese(20,50,"刷卡成功",RED,WHITE,16,0);
                               return;
                           }
 
                           if(z != 5)
                           {
-                              lcd_show_chinese(20,50,"正国电",RED,WHITE,16,0);
+                              lcd_show_chinese(20,50,"刷卡失败",RED,WHITE,16,0);
 
 
                     }
@@ -260,7 +255,6 @@ void USART2_IRQHandler(void)
 
 void UART7_IRQHandler(void)
 {
-    // 溢出错误：读SR再读DR清掉，否则中断卡死
     if(USART_GetFlagStatus(UART7, USART_FLAG_ORE) != RESET)
     {
         USART_ReceiveData(UART7);
@@ -280,3 +274,15 @@ void UART7_IRQHandler(void)
     }
 }
 
+void UART6_IRQHandler(void)
+{
+    u8 temp = 0;
+    if(USART_GetITStatus(UART6, USART_IT_RXNE) != RESET)
+    {
+        uart6_rec_tick = 0;
+        temp = USART_ReceiveData(UART6);
+        uart6_rec_string[uart6_rec_index] = temp;
+        uart6_rec_index++;
+    }
+    USART_ClearITPendingBit(UART6, USART_IT_RXNE);
+}

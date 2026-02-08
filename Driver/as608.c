@@ -14,7 +14,7 @@ u8 old;
           while(USART_GetFlagStatus(UART7, USART_FLAG_TXE) == RESET);
           USART_SendData(UART7, data[i]);
       }
-      while(USART_GetFlagStatus(UART7, USART_FLAG_TC) == RESET);  /* 等最后一字节发完 */
+      while(USART_GetFlagStatus(UART7, USART_FLAG_TC) == RESET);
   }
 
     void PS_GetImage()
@@ -90,13 +90,13 @@ void as608_play(u8 addr)
 
 void as608_search()
 {
-    PS_GetImage();//从指纹传感器获取图像到暂存区
-    as608_wait();//等待接收到数据包
+    PS_GetImage();
+    as608_wait();
     PS_GenChar(2);
-    as608_wait();//等待接收到数据包
+    as608_wait();
     PS_Search();
-    as608_wait();//等待接收到数据包
-    if(uart7_temp[13]>50)//匹配
+    as608_wait();
+    if(uart7_temp[13]>50)
     {
         lcd_show_chinese(20,15,"我爱你中国",RED,WHITE,16,0);
         servo_flag = 1;

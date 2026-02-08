@@ -1,7 +1,7 @@
 /*
  * gpio.h
  *
- *  Created on: 2026Äê2ÔÂ6ÈÕ
+ *  Created on: 2026ï¿½ï¿½2ï¿½ï¿½6ï¿½ï¿½
  *      Author: Elaina
  */
 
@@ -13,4 +13,5 @@ void Servo_Init(void);
 void UART3_GPIO_Init(void);
 void UART2_GPIO_Init(void);
 void UART7_GPIO_Init(void);
+void UART6_GPIO_Init(void);
 #endif /* DRIVER_GPIO_H_ */

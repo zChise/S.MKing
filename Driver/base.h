@@ -1,7 +1,7 @@
 /*
  * base.h
  *
- *  Created on: 2026Äê2ÔÂ6ÈÕ
+ *  Created on: 2026ï¿½ï¿½2ï¿½ï¿½6ï¿½ï¿½
  *      Author: Elaina
  */
 
@@ -23,6 +23,7 @@
 #include "schedul.h"
 #include "lcd_play.h"
 #include "as608.h"
+#include "esp8266.h"
 #include "string.h"
   extern volatile unsigned long int uwtick;
   extern volatile unsigned long int as608_time;
@@ -40,6 +41,9 @@
   extern u8 servo_flag;
   extern u8 rfid_store_index;
   extern u8 rfid_temp[50];
+  extern u8 uart6_rec_string[256];
+  extern volatile u8 uart6_rec_tick;
+  extern volatile u8 uart6_rec_index;
 #endif /* DRIVER_BASE_H_ */
 
 
